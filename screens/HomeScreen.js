@@ -15,8 +15,6 @@ const HomeScreen = () => {
       .catch((e) => console.log(e));
   }, []);
 
-  console.log(stats);
-
   return (
     <View style={styles.container}>
       <View style={styles.totalStudentReports}>
@@ -52,8 +50,8 @@ const HomeScreen = () => {
       <View style={styles.totalResolvedReports}>
         <View>
           <Icon
-            name="hourglass-half"
-            size={30}
+            name="check-circle"
+            size={34}
             color="#1B9E3E"
             style={{ marginBottom: 10 }}
           />

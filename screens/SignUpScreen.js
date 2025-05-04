@@ -20,7 +20,7 @@ const LoginScreen = () => {
         <View style={styles.loginHeaderContainer}>
           <View style={styles.loginImageContainer}>
             <Image
-              source={require("../assets/default.png")}
+              source={require("../assets/new-era.jpeg")}
               style={styles.image}
             />
 
@@ -58,7 +58,7 @@ const LoginScreen = () => {
           </View>
 
           <View style={styles.btnContainer}>
-            <Button title="Sign Up" color="#8a2be2" />
+            <Button title="Sign Up" color="#228b22" />
           </View>
 
           <Pressable onPress={() => navigation.navigate("Login")}>

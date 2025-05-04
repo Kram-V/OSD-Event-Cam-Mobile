@@ -15,7 +15,12 @@ const BottomTabs = createBottomTabNavigator();
 
 function TabsScreen() {
   return (
-    <BottomTabs.Navigator>
+    <BottomTabs.Navigator
+      screenOptions={{
+        tabBarActiveTintColor: "#228B22",
+        tabBarInactiveTintColor: "gray",
+      }}
+    >
       <BottomTabs.Screen
         options={{
           tabBarIcon: ({ color, size }) => (

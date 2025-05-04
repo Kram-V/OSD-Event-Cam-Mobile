@@ -20,7 +20,7 @@ const SignUpScreen = () => {
         <View style={styles.loginHeaderContainer}>
           <View style={styles.loginImageContainer}>
             <Image
-              source={require("../assets/default.png")}
+              source={require("../assets/new-era.jpeg")}
               style={styles.image}
             />
 
@@ -47,7 +47,7 @@ const SignUpScreen = () => {
           <View style={styles.btnContainer}>
             <Button
               title="Login"
-              color="#8a2be2"
+              color="#228b22"
               onPress={() => navigation.navigate("Tabs Screen")}
             />
           </View>
