@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Button,
   Image,
   Pressable,
@@ -15,23 +16,21 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import DropDownPicker from "react-native-dropdown-picker";
 import { CheckBox } from "react-native-elements";
+import axios from "axios";
 
 const CreateReportScreen = () => {
-  const [isProgramOpen, setIsProgramOpen] = useState(false);
-  const [program, setProgram] = useState(null);
-  const [programs, setPrograms] = useState([
-    { label: "Select Program", value: "" },
-    { label: "BSIT", value: "bsit" },
-    { label: "BSCS", value: "bscs" },
-  ]);
-
   const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
   const [department, setDepartment] = useState(null);
-  const [departments, setDepartments] = useState([
-    { label: "Select Department", value: "" },
-    { label: "Engineering Department", value: "Engineering Department" },
-    { label: "Business & Economics", value: "Business & Economics" },
-  ]);
+  const [departments, setDepartments] = useState([]);
+
+  const [isProgramOpen, setIsProgramOpen] = useState(false);
+  const [program, setProgram] = useState(null);
+  const [programs, setPrograms] = useState([]);
+
+  const [studentName, setStudentName] = useState("");
+  const [studentId, setStudentId] = useState("");
+
+  const [location, setLocation] = useState("");
 
   const [isViolationOpen, setIsViolationOpen] = useState(false);
   const [violation, setViolation] = useState(null);
@@ -55,51 +54,114 @@ const CreateReportScreen = () => {
       value: "Other Violations",
     },
   ]);
+  const [otherViolationName, setOtherViolationName] = useState("");
+  const [explainSpecify, setExplainSpecify] = useState("");
+
+  const [otherRemarks, setOtherRemarks] = useState("");
 
   // Inappropriate Civilian Attire Violation
-  const [croptop, setCroptop] = useState(false);
-  const [shorts, setShorts] = useState(false);
-  const [miniSkirt, setMiniSkirt] = useState(false);
-  const [leggings, setLeggings] = useState(false);
-  const [tatteredJeans, setTatteredJeans] = useState(false);
-  const [sandalsSlippers, setSandalsSlippers] = useState(false);
+  const [
+    inappropriateCivilianAttireViolations,
+    setInappropriateCivilianAttireViolations,
+  ] = useState({
+    Croptop: false,
+    Shorts: false,
+    "Mini-Skirt": false,
+    Leggings: false,
+    "Tattered Jeans": false,
+    "Sandals/Slippers": false,
+  });
+
+  const toggleInappropriateCivilianAttireViolations = (name) => {
+    setInappropriateCivilianAttireViolations((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
+  };
+
+  const getSelectedInappropriateCivilianAttireViolations = () => {
+    return Object.entries(inappropriateCivilianAttireViolations)
+      .filter(([_, isChecked]) => isChecked)
+      .map(([violation]) => violation);
+  };
 
   // Hair Violation
-  const [longHiar, setLongHiar] = useState(false);
-  const [coloredHair, setColoredHair] = useState(false);
-  const [improperHaircutHairStyle, setImproperHaircutHairStyle] =
-    useState(false);
+  const [hairViolations, setHairViolation] = useState({
+    "Long Hair": false,
+    "Colored Hair": false,
+    "Improper Haircut/Hairstyle": false,
+  });
+
+  const toggleHairViolations = (name) => {
+    setHairViolation((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
+  };
+
+  const getSelectedHairViolations = () => {
+    return Object.entries(hairViolations)
+      .filter(([_, isChecked]) => isChecked)
+      .map(([violation]) => violation);
+  };
 
   // Incomplete Uniform for Criminology Violation
-  const [lanyard, setLanyard] = useState(false);
-  const [whistle, setWhistle] = useState(false);
-  const [namePlate, setNamePlate] = useState(false);
-  const [belt, setBelt] = useState(false);
-  const [charol, setCharol] = useState(false);
+  const [
+    incompleteUniformForCriminologyViolations,
+    setIncompleteUniformForCriminologyViolations,
+  ] = useState({
+    Lanyard: false,
+    Whistle: false,
+    Nameplate: false,
+    Belt: false,
+    Charol: false,
+  });
+
+  const toggleIncompleteUniformForCriminologyViolations = (name) => {
+    setIncompleteUniformForCriminologyViolations((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
+  };
+
+  const getSelectedIncompleteUniformForCriminologyViolations = () => {
+    return Object.entries(incompleteUniformForCriminologyViolations)
+      .filter(([_, isChecked]) => isChecked)
+      .map(([violation]) => violation);
+  };
 
   // Not Wearing Prescribed Uniform Violation
-  const [noPatch, setNoPatch] = useState(false);
-  const [noNecktie, setNoNecktie] = useState(false);
-  const [blackOrOtherPants, setBlackOrOtherPants] = useState(false);
-  const [coloredFootSocks, setColoredFootSocks] = useState(false);
-  const [unofficialPeOrOrgShirt, setUnofficialPeOrOrgShirt] = useState(false);
   const [
-    wearingPeUniformOtherThanPeClassOrTime,
-    setWearingPeUniformOtherThanPeClassOrTime,
-  ] = useState(false);
-  const [
-    wearingRubberShoesOtherThanPeClassOrTime,
-    setWearingRubberShoesOtherThanPeClassOrTime,
-  ] = useState(false);
-  const [
-    enteringTheCampusWithoutTheOfficialId,
-    setEnteringTheCampusWithoutTheOfficialId,
-  ] = useState(false);
-  const [usingUnofficialId, setUsingUnofficialId] = useState(false);
-  const [usingSomeonesId, setUsingSomeonesId] = useState(false);
-  const [idTampering, setIdTampering] = useState(false);
-  const [usingUnofficialIdLace, setUsingUnofficialIdLace] = useState(false);
-  const [noIdLace, setNoIdLace] = useState(false);
+    notWearingPrescribedUniformViolations,
+    setNotWearingPrescribedUniformViolations,
+  ] = useState({
+    "No Patch": false,
+    "No Necktie": false,
+    "Black Or Other Pants": false,
+    "Colored Footsocks": false,
+    "Unofficial PE or ORG Shirt": false,
+    "Wearing PE Uniform, Other Than PE Class(IS) or Time(College)": false,
+    "Wearing Rubber Shoes, Other Than PE Class(IS) or Time(College)": false,
+    "Entering The Campus Without The Official ID": false,
+    "Using Unofficial ID": false,
+    "Using Someone's ID": false,
+    "ID Tampering": false,
+    "Using Unofficial ID Lace": false,
+    "No ID Lace": false,
+  });
+
+  const toggleNotWearingPrescribedUniformViolations = (name) => {
+    setNotWearingPrescribedUniformViolations((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
+  };
+
+  const getSelectedNotWearingPrescribedUniformViolations = () => {
+    return Object.entries(notWearingPrescribedUniformViolations)
+      .filter(([_, isChecked]) => isChecked)
+      .map(([violation]) => violation);
+  };
 
   const [time, setTime] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
@@ -110,41 +172,173 @@ const CreateReportScreen = () => {
   };
 
   const handleReset = () => {
-    setCroptop(false);
-    setShorts(false);
-    setMiniSkirt(false);
-    setLeggings(false);
-    setTatteredJeans(false);
-    setSandalsSlippers(false);
+    setDepartment(null);
+    setProgram(null);
+    setStudentName("");
+    setStudentId("");
+    setTime(new Date());
+    setLocation("");
+    setViolation(null);
+    setOtherRemarks("");
+  };
 
-    setLongHiar(false);
-    setColoredHair(false);
-    setImproperHaircutHairStyle(false);
+  const handleResetViolation = () => {
+    setInappropriateCivilianAttireViolations({
+      Croptop: false,
+      Shorts: false,
+      "Mini-Skirt": false,
+      Leggings: false,
+      "Tattered Jeans": false,
+      "Sandals/Slippers": false,
+    });
 
-    setLanyard(false);
-    setWhistle(false);
-    setNamePlate(false);
-    setBelt(false);
-    setCharol(false);
+    setHairViolation({
+      "Long Hair": false,
+      "Colored Hair": false,
+      "Improper Haircut/Hairstyle": false,
+    });
 
-    setNoPatch(false);
-    setNoNecktie(false);
-    setBlackOrOtherPants(false);
-    setColoredFootSocks(false);
-    setUnofficialPeOrOrgShirt(false);
-    setWearingPeUniformOtherThanPeClassOrTime(false);
-    setWearingRubberShoesOtherThanPeClassOrTime(false);
-    setEnteringTheCampusWithoutTheOfficialId(false);
-    setUsingUnofficialId(false);
-    setUsingSomeonesId(false);
-    setIdTampering(false);
-    setUsingUnofficialIdLace(false);
-    setNoIdLace(false);
+    setIncompleteUniformForCriminologyViolations({
+      Lanyard: false,
+      Whistle: false,
+      Nameplate: false,
+      Belt: false,
+      Charol: false,
+    });
+
+    setNotWearingPrescribedUniformViolations({
+      "No Patch": false,
+      "No Necktie": false,
+      "Black Or Other Pants": false,
+      "Colored Footsocks": false,
+      "Unofficial PE or ORG Shirt": false,
+      "Wearing PE Uniform, Other Than PE Class(IS) or Time(College)": false,
+      "Wearing Rubber Shoes, Other Than PE Class(IS) or Time(College)": false,
+      "Entering The Campus Without The Official ID": false,
+      "Using Unofficial ID": false,
+      "Using Someone's ID": false,
+      "ID Tampering": false,
+      "Using Unofficial ID Lace": false,
+      "No ID Lace": false,
+    });
+  };
+
+  const handleSubmit = () => {
+    let selectedViolations = null;
+    let violationName = null;
+    let otherExplainSpecify = null;
+
+    const utcDate = new Date(time);
+    const localTime = utcDate.toLocaleString("en-PH", {
+      timeZone: "Asia/Manila",
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
+    if (violation === "Inappropriate Civilian Attire") {
+      selectedViolations = getSelectedInappropriateCivilianAttireViolations();
+    }
+
+    if (violation === "Hair Violation") {
+      selectedViolations = getSelectedHairViolations();
+    }
+
+    if (violation === "Incomplete Uniform for Criminology") {
+      selectedViolations =
+        getSelectedIncompleteUniformForCriminologyViolations();
+    }
+
+    if (violation === "Not Wearing Prescribed Uniform") {
+      selectedViolations = getSelectedNotWearingPrescribedUniformViolations();
+    }
+
+    if (violation === "Other Violations") {
+      violationName = otherViolationName;
+      otherExplainSpecify = explainSpecify;
+    }
+
+    axios
+      .post("http://10.0.2.2:8000/api/mobile-reports", {
+        department_id: department,
+        program_id: program,
+        student_name: studentName,
+        student_id: studentId,
+        time: localTime,
+        location,
+        violation_name: violation,
+        violations:
+          !selectedViolations || selectedViolations.length == 0
+            ? null
+            : JSON.stringify(selectedViolations),
+        other_violation_name: violationName,
+        explain_specify: otherExplainSpecify,
+        other_remarks: otherRemarks,
+      })
+      .then((res) => {
+        handleReset();
+        handleResetViolation();
+        Alert.alert(
+          "Success",
+          "Report submitted successfully!",
+          [{ text: "OK" }],
+          { cancelable: false }
+        );
+      })
+      .catch((res) => {
+        Alert.alert(
+          "Error",
+          "Failed to submit the report. Please try again.",
+          [{ text: "OK" }],
+          { cancelable: false }
+        );
+      });
+  };
+
+  const getDepartments = () => {
+    axios
+      .get("http://10.0.2.2:8000/api/mobile-departments")
+      .then((res) => {
+        const mappedDeparments = res.data.departments.map((department) => {
+          return {
+            label: department.name,
+            value: department.id,
+          };
+        });
+
+        setDepartments(mappedDeparments);
+      })
+      .catch((e) => console.log(e));
+  };
+
+  const getPrograms = (departmentId) => {
+    axios
+      .get(`http://10.0.2.2:8000/api/mobile-programs/${departmentId}`)
+      .then((res) => {
+        const mappedPrograms = res.data.programs.map((program) => {
+          return {
+            label: program.name,
+            value: program.id,
+          };
+        });
+
+        setPrograms(mappedPrograms);
+      })
+      .catch((e) => console.log(e));
   };
 
   useEffect(() => {
-    handleReset();
+    handleResetViolation();
   }, [violation]);
+
+  useEffect(() => {
+    getDepartments();
+  }, []);
+
+  useEffect(() => {
+    getPrograms(department);
+  }, [department]);
 
   return (
     <ScrollView
@@ -157,6 +351,12 @@ const CreateReportScreen = () => {
           size={35}
           color="gray"
           style={{ marginBottom: 10, position: "absolute", right: 20, top: 10 }}
+        />
+        <Icon
+          name="camera"
+          size={30}
+          color="gray"
+          style={{ marginBottom: 10, position: "absolute", right: 60, top: 12 }}
         />
 
         <View style={styles.content}>
@@ -229,8 +429,8 @@ const CreateReportScreen = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Enter Student Name "
-                keyboardType="email-address"
-                autoCapitalize="none"
+                value={studentName}
+                onChangeText={(text) => setStudentName(text)}
               />
             </View>
 
@@ -240,6 +440,8 @@ const CreateReportScreen = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Enter Student ID Number"
+                value={studentId}
+                onChangeText={(text) => setStudentId(text)}
               />
             </View>
 
@@ -275,7 +477,12 @@ const CreateReportScreen = () => {
 
               <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
                 <Text style={styles.label}>Location</Text>
-                <TextInput style={styles.input} placeholder="Enter Location" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter Location"
+                  value={location}
+                  onChangeText={(text) => setLocation(text)}
+                />
               </View>
             </View>
 
@@ -315,8 +522,10 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Croptop"
-                      checked={croptop}
-                      onPress={() => setCroptop(!croptop)}
+                      checked={inappropriateCivilianAttireViolations.Croptop}
+                      onPress={() =>
+                        toggleInappropriateCivilianAttireViolations("Croptop")
+                      }
                     />
                   </View>
 
@@ -324,8 +533,10 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Shorts"
-                      checked={shorts}
-                      onPress={() => setShorts(!shorts)}
+                      checked={inappropriateCivilianAttireViolations.Shorts}
+                      onPress={() =>
+                        toggleInappropriateCivilianAttireViolations("Shorts")
+                      }
                     />
                   </View>
                 </View>
@@ -335,8 +546,14 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Mini-Skirt"
-                      checked={miniSkirt}
-                      onPress={() => setMiniSkirt(!miniSkirt)}
+                      checked={
+                        inappropriateCivilianAttireViolations["Mini-Skirt"]
+                      }
+                      onPress={() =>
+                        toggleInappropriateCivilianAttireViolations(
+                          "Mini-Skirt"
+                        )
+                      }
                     />
                   </View>
 
@@ -344,8 +561,10 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Leggings"
-                      checked={leggings}
-                      onPress={() => setLeggings(!leggings)}
+                      checked={inappropriateCivilianAttireViolations.Leggings}
+                      onPress={() =>
+                        toggleInappropriateCivilianAttireViolations("Leggings")
+                      }
                     />
                   </View>
                 </View>
@@ -355,8 +574,14 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Tattered Jeans"
-                      checked={tatteredJeans}
-                      onPress={() => setTatteredJeans(!tatteredJeans)}
+                      checked={
+                        inappropriateCivilianAttireViolations["Tattered Jeans"]
+                      }
+                      onPress={() =>
+                        toggleInappropriateCivilianAttireViolations(
+                          "Tattered Jeans"
+                        )
+                      }
                     />
                   </View>
 
@@ -364,8 +589,16 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Sandals/Slippers"
-                      checked={sandalsSlippers}
-                      onPress={() => setSandalsSlippers(!sandalsSlippers)}
+                      checked={
+                        inappropriateCivilianAttireViolations[
+                          "Sandals/Slippers"
+                        ]
+                      }
+                      onPress={() =>
+                        toggleInappropriateCivilianAttireViolations(
+                          "Sandals/Slippers"
+                        )
+                      }
                     />
                   </View>
                 </View>
@@ -379,17 +612,17 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Long Hair"
-                      checked={longHiar}
-                      onPress={() => setLongHiar(!longHiar)}
+                      checked={hairViolations["Long Hair"]}
+                      onPress={() => toggleHairViolations("Long Hair")}
                     />
                   </View>
 
                   <View style={[styles.inputGroupCheckBox, { flex: 1 }]}>
                     <CheckBox
                       checkedColor="#228b22"
-                      title="Colored Haird"
-                      checked={coloredHair}
-                      onPress={() => setColoredHair(!coloredHair)}
+                      title="Colored Hair"
+                      checked={hairViolations["Colored Hair"]}
+                      onPress={() => toggleHairViolations("Colored Hair")}
                     />
                   </View>
                 </View>
@@ -398,10 +631,10 @@ const CreateReportScreen = () => {
                   <View style={[styles.inputGroupCheckBox, { flex: 1 }]}>
                     <CheckBox
                       checkedColor="#228b22"
-                      title="Improper Haircut/HairStyle"
-                      checked={improperHaircutHairStyle}
+                      title="Improper Haircut/Hairstyle"
+                      checked={hairViolations["Improper Haircut/Hairstyle"]}
                       onPress={() =>
-                        setImproperHaircutHairStyle(!improperHaircutHairStyle)
+                        toggleHairViolations("Improper Haircut/Hairstyle")
                       }
                     />
                   </View>
@@ -416,8 +649,14 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Lanyard"
-                      checked={lanyard}
-                      onPress={() => setLanyard(!lanyard)}
+                      checked={
+                        incompleteUniformForCriminologyViolations.Lanyard
+                      }
+                      onPress={() =>
+                        toggleIncompleteUniformForCriminologyViolations(
+                          "Lanyard"
+                        )
+                      }
                     />
                   </View>
 
@@ -425,8 +664,14 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Whistle"
-                      checked={whistle}
-                      onPress={() => setWhistle(!whistle)}
+                      checked={
+                        incompleteUniformForCriminologyViolations.Whistle
+                      }
+                      onPress={() =>
+                        toggleIncompleteUniformForCriminologyViolations(
+                          "Whistle"
+                        )
+                      }
                     />
                   </View>
                 </View>
@@ -436,8 +681,14 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Nameplate"
-                      checked={namePlate}
-                      onPress={() => setNamePlate(!namePlate)}
+                      checked={
+                        incompleteUniformForCriminologyViolations.Nameplate
+                      }
+                      onPress={() =>
+                        toggleIncompleteUniformForCriminologyViolations(
+                          "Nameplate"
+                        )
+                      }
                     />
                   </View>
 
@@ -445,8 +696,10 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Belt"
-                      checked={belt}
-                      onPress={() => setBelt(!belt)}
+                      checked={incompleteUniformForCriminologyViolations.Belt}
+                      onPress={() =>
+                        toggleIncompleteUniformForCriminologyViolations("Belt")
+                      }
                     />
                   </View>
                 </View>
@@ -456,8 +709,12 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Charol"
-                      checked={charol}
-                      onPress={() => setCharol(!charol)}
+                      checked={incompleteUniformForCriminologyViolations.Charol}
+                      onPress={() =>
+                        toggleIncompleteUniformForCriminologyViolations(
+                          "Charol"
+                        )
+                      }
                     />
                   </View>
                 </View>
@@ -471,8 +728,12 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="No Patch"
-                      checked={noPatch}
-                      onPress={() => setNoPatch(!noPatch)}
+                      checked={
+                        notWearingPrescribedUniformViolations["No Patch"]
+                      }
+                      onPress={() =>
+                        toggleNotWearingPrescribedUniformViolations("No Patch")
+                      }
                     />
                   </View>
 
@@ -480,8 +741,14 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="No Necktie"
-                      checked={noNecktie}
-                      onPress={() => setNoNecktie(!noNecktie)}
+                      checked={
+                        notWearingPrescribedUniformViolations["No Necktie"]
+                      }
+                      onPress={() =>
+                        toggleNotWearingPrescribedUniformViolations(
+                          "No Necktie"
+                        )
+                      }
                     />
                   </View>
                 </View>
@@ -491,8 +758,16 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Black or Other Pants"
-                      checked={blackOrOtherPants}
-                      onPress={() => setBlackOrOtherPants(!blackOrOtherPants)}
+                      checked={
+                        notWearingPrescribedUniformViolations[
+                          "Black or Other Pants"
+                        ]
+                      }
+                      onPress={() =>
+                        toggleNotWearingPrescribedUniformViolations(
+                          "Black or Other Pants"
+                        )
+                      }
                     />
                   </View>
 
@@ -500,8 +775,16 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Colored Footsocks"
-                      checked={coloredFootSocks}
-                      onPress={() => setColoredFootSocks(!coloredFootSocks)}
+                      checked={
+                        notWearingPrescribedUniformViolations[
+                          "Colored Footsocks"
+                        ]
+                      }
+                      onPress={() =>
+                        toggleNotWearingPrescribedUniformViolations(
+                          "Colored Footsocks"
+                        )
+                      }
                     />
                   </View>
                 </View>
@@ -511,9 +794,15 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Unofficial PE or ORG Shirt"
-                      checked={unofficialPeOrOrgShirt}
+                      checked={
+                        notWearingPrescribedUniformViolations[
+                          "Unofficial PE or ORG Shirt"
+                        ]
+                      }
                       onPress={() =>
-                        setUnofficialPeOrOrgShirt(!unofficialPeOrOrgShirt)
+                        toggleNotWearingPrescribedUniformViolations(
+                          "Unofficial PE or ORG Shirt"
+                        )
                       }
                     />
                   </View>
@@ -524,10 +813,14 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Wearing PE Uniform, Other Than PE Class(IS) or Time(COLLEGE)"
-                      checked={wearingPeUniformOtherThanPeClassOrTime}
+                      checked={
+                        notWearingPrescribedUniformViolations[
+                          "Wearing PE Uniform, Other Than PE Class(IS) or Time(COLLEGE)"
+                        ]
+                      }
                       onPress={() =>
-                        setWearingPeUniformOtherThanPeClassOrTime(
-                          !wearingPeUniformOtherThanPeClassOrTime
+                        toggleNotWearingPrescribedUniformViolations(
+                          "Wearing PE Uniform, Other Than PE Class(IS) or Time(COLLEGE)"
                         )
                       }
                     />
@@ -539,10 +832,14 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Wearing Rubber Shoes, Other Than PE Class(IS) or Time(COLLEGE)"
-                      checked={wearingRubberShoesOtherThanPeClassOrTime}
+                      checked={
+                        notWearingPrescribedUniformViolations[
+                          "Wearing Rubber Shoes, Other Than PE Class(IS) or Time(COLLEGE)"
+                        ]
+                      }
                       onPress={() =>
-                        setWearingRubberShoesOtherThanPeClassOrTime(
-                          !wearingRubberShoesOtherThanPeClassOrTime
+                        toggleNotWearingPrescribedUniformViolations(
+                          "Wearing Rubber Shoes, Other Than PE Class(IS) or Time(COLLEGE)"
                         )
                       }
                     />
@@ -554,10 +851,14 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Entering The Campus Without The Official ID"
-                      checked={enteringTheCampusWithoutTheOfficialId}
+                      checked={
+                        notWearingPrescribedUniformViolations[
+                          "Entering The Campus Without The Official ID"
+                        ]
+                      }
                       onPress={() =>
-                        setEnteringTheCampusWithoutTheOfficialId(
-                          !enteringTheCampusWithoutTheOfficialId
+                        toggleNotWearingPrescribedUniformViolations(
+                          "Entering The Campus Without The Official ID"
                         )
                       }
                     />
@@ -569,8 +870,16 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Using Unofficial ID"
-                      checked={usingUnofficialId}
-                      onPress={() => setUsingUnofficialId(!usingUnofficialId)}
+                      checked={
+                        notWearingPrescribedUniformViolations[
+                          "Using Unofficial ID"
+                        ]
+                      }
+                      onPress={() =>
+                        toggleNotWearingPrescribedUniformViolations(
+                          "Using Unofficial ID"
+                        )
+                      }
                     />
                   </View>
 
@@ -578,8 +887,16 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Using Someone's ID"
-                      checked={usingSomeonesId}
-                      onPress={() => setUsingSomeonesId(!usingSomeonesId)}
+                      checked={
+                        notWearingPrescribedUniformViolations[
+                          "Using Someone's ID"
+                        ]
+                      }
+                      onPress={() =>
+                        toggleNotWearingPrescribedUniformViolations(
+                          "Using Someone's ID"
+                        )
+                      }
                     />
                   </View>
                 </View>
@@ -589,8 +906,14 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="ID Tampering"
-                      checked={idTampering}
-                      onPress={() => setIdTampering(!idTampering)}
+                      checked={
+                        notWearingPrescribedUniformViolations["ID Tampering"]
+                      }
+                      onPress={() =>
+                        toggleNotWearingPrescribedUniformViolations(
+                          "ID Tampering"
+                        )
+                      }
                     />
                   </View>
 
@@ -598,8 +921,14 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="No ID Lace"
-                      checked={noIdLace}
-                      onPress={() => setNoIdLace(!noIdLace)}
+                      checked={
+                        notWearingPrescribedUniformViolations["No ID Lace"]
+                      }
+                      onPress={() =>
+                        toggleNotWearingPrescribedUniformViolations(
+                          "No ID Lace"
+                        )
+                      }
                     />
                   </View>
                 </View>
@@ -609,9 +938,15 @@ const CreateReportScreen = () => {
                     <CheckBox
                       checkedColor="#228b22"
                       title="Using Unofficial ID Lace"
-                      checked={usingUnofficialIdLace}
+                      checked={
+                        notWearingPrescribedUniformViolations[
+                          "Using Unofficial ID Lace"
+                        ]
+                      }
                       onPress={() =>
-                        setUsingUnofficialIdLace(!usingUnofficialIdLace)
+                        toggleNotWearingPrescribedUniformViolations(
+                          "Using Unofficial ID Lace"
+                        )
                       }
                     />
                   </View>
@@ -627,6 +962,8 @@ const CreateReportScreen = () => {
                     style={styles.input}
                     placeholder="Enter Other Violation"
                     autoCapitalize="none"
+                    value={otherViolationName}
+                    onChangeText={(text) => setOtherViolationName(text)}
                   />
                 </View>
 
@@ -640,6 +977,8 @@ const CreateReportScreen = () => {
                     placeholder="Explain or Specify Here..."
                     multiline={true}
                     numberOfLines={4}
+                    value={explainSpecify}
+                    onChangeText={(text) => setExplainSpecify(text)}
                   />
                 </View>
               </>
@@ -655,22 +994,13 @@ const CreateReportScreen = () => {
                 placeholder="Enter Remarks Here..."
                 multiline={true}
                 numberOfLines={4}
+                value={otherRemarks}
+                onChangeText={(text) => setOtherRemarks(text)}
               />
             </View>
 
-            <Icon
-              name="camera"
-              size={45}
-              color="gray"
-              style={{ marginBottom: 10 }}
-            />
-
             <View style={styles.btnContainer}>
-              <Button
-                title="Submit"
-                color="#228b22"
-                onPress={() => navigation.navigate("Tabs Screen")}
-              />
+              <Button title="Submit" color="#228b22" onPress={handleSubmit} />
             </View>
           </View>
         </View>
