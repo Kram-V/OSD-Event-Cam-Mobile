@@ -14,6 +14,8 @@ const Stack = createNativeStackNavigator();
 const BottomTabs = createBottomTabNavigator();
 
 function TabsScreen() {
+  const [isCreatedSuccess, setIsCreatedSuccess] = React.useState(false);
+
   return (
     <BottomTabs.Navigator
       screenOptions={{
@@ -28,8 +30,14 @@ function TabsScreen() {
           ),
         }}
         name="Home"
-        component={HomeScreen}
-      />
+      >
+        {() => (
+          <HomeScreen
+            isCreatedSuccess={isCreatedSuccess}
+            setIsCreatedSuccess={setIsCreatedSuccess}
+          />
+        )}
+      </BottomTabs.Screen>
       <BottomTabs.Screen
         options={{
           tabBarIcon: ({ color, size }) => (
@@ -37,8 +45,9 @@ function TabsScreen() {
           ),
         }}
         name="Create Report"
-        component={CreateReportScreen}
-      />
+      >
+        {() => <CreateReportScreen setIsCreatedSuccess={setIsCreatedSuccess} />}
+      </BottomTabs.Screen>
       <BottomTabs.Screen
         options={{
           tabBarIcon: ({ color, size }) => (

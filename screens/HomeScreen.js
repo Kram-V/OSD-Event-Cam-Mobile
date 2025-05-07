@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
-const HomeScreen = () => {
+const HomeScreen = ({ isCreatedSuccess, setIsCreatedSuccess }) => {
   const [stats, setStats] = useState(null);
   const [reports, setReports] = useState([]);
 
@@ -29,6 +29,14 @@ const HomeScreen = () => {
     getStats();
     getReports();
   }, []);
+
+  useEffect(() => {
+    if (isCreatedSuccess) {
+      getStats();
+      getReports();
+      setIsCreatedSuccess(false);
+    }
+  }, [isCreatedSuccess]);
 
   return (
     <View style={styles.container}>

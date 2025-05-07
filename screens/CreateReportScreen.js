@@ -19,7 +19,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { CheckBox } from "react-native-elements";
 import axios from "axios";
 
-const CreateReportScreen = () => {
+const CreateReportScreen = ({ setIsCreatedSuccess }) => {
   const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
   const [department, setDepartment] = useState(null);
   const [departments, setDepartments] = useState([]);
@@ -301,6 +301,7 @@ const CreateReportScreen = () => {
           { cancelable: false }
         );
 
+        setIsCreatedSuccess(true);
         setErrors(null);
         setIsEditable(false);
       })
