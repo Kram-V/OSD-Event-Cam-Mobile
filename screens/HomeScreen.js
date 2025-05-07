@@ -32,7 +32,6 @@ const HomeScreen = ({ isCreatedSuccess, setIsCreatedSuccess }) => {
 
   useEffect(() => {
     if (isCreatedSuccess) {
-      getStats();
       getReports();
       setIsCreatedSuccess(false);
     }
