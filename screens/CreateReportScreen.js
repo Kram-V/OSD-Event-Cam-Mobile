@@ -28,6 +28,25 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
   const [program, setProgram] = useState(null);
   const [programs, setPrograms] = useState([]);
 
+  const [isYearOpen, setIsYearOpen] = useState(false);
+  const [year, setYear] = useState(null);
+  const [years, setYears] = useState([
+    { label: "Select Year", value: "" },
+    {
+      label: "First Year",
+      value: "First Year",
+    },
+    { label: "Second Year", value: "Second Year" },
+    {
+      label: "Third Year",
+      value: "Third Year",
+    },
+    {
+      label: "Fourth Year",
+      value: "Fourth Year",
+    },
+  ]);
+
   const [studentName, setStudentName] = useState("");
   const [studentId, setStudentId] = useState("");
 
@@ -184,6 +203,7 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
   const handleReset = () => {
     setDepartment(null);
     setProgram(null);
+    setYear(null);
     setStudentName("");
     setStudentId("");
     setGuardianName("");
@@ -276,6 +296,7 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
       .post("http://10.0.2.2:8000/api/mobile-reports", {
         department,
         program,
+        year,
         student_name: studentName,
         student_id: studentId,
         guardian_name: guardianName,
@@ -483,9 +504,47 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
               )}
             </View>
 
+            <View style={[styles.inputGroup, { zIndex: 800 }]}>
+              <View style={{ flexDirection: "row" }}>
+                <Text style={styles.label}>Year </Text>
+                <Text style={{ color: "red" }}>*</Text>
+              </View>
+
+              <DropDownPicker
+                open={isYearOpen}
+                value={year}
+                items={years}
+                setOpen={setIsYearOpen}
+                setValue={setYear}
+                setItems={setYears}
+                placeholder="Select Year"
+                listMode="SCROLLVIEW"
+                dropDownDirection="AUTO"
+                style={{
+                  borderColor: "#ccc",
+                  height: 48,
+                  paddingHorizontal: 12,
+                }}
+                textStyle={{ fontSize: 13 }}
+                dropDownContainerStyle={{
+                  borderWidth: 1,
+                  borderColor: "#ccc",
+                  borderRadius: 6,
+                  backgroundColor: "#fff",
+                  maxHeight: 400,
+                }}
+              />
+
+              {errors && errors["year"] && errors["year"][0] && (
+                <Text style={{ color: "red", fontSize: 14 }}>
+                  {errors["year"][0]}
+                </Text>
+              )}
+            </View>
+
             <View style={styles.inputGroup}>
               <View style={{ flexDirection: "row" }}>
-                <Text style={styles.label}>Student Name </Text>
+                <Text style={styles.label}>Student Name</Text>
                 <Text style={{ color: "red" }}>*</Text>
               </View>
 
