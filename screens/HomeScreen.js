@@ -5,14 +5,29 @@ import Icon from "react-native-vector-icons/FontAwesome";
 
 const HomeScreen = () => {
   const [stats, setStats] = useState(null);
+  const [reports, setReports] = useState([]);
 
-  useEffect(() => {
+  const getStats = () => {
     axios
       .get("http://10.0.2.2:8000/api/mobile-stats")
       .then((res) => {
         setStats(res.data.total_non_admin_users);
       })
       .catch((e) => console.log(e));
+  };
+
+  const getReports = () => {
+    axios
+      .get("http://10.0.2.2:8000/api/mobile-reports")
+      .then((res) => {
+        setReports(res.data.reports);
+      })
+      .catch((e) => console.log(e));
+  };
+
+  useEffect(() => {
+    getStats();
+    getReports();
   }, []);
 
   return (
@@ -29,7 +44,7 @@ const HomeScreen = () => {
           <Text>Total Student Reports</Text>
         </View>
 
-        <Text style={styles.totalNumber}>50</Text>
+        <Text style={styles.totalNumber}>{reports.length}</Text>
       </View>
 
       <View style={styles.totalPendingReports}>
