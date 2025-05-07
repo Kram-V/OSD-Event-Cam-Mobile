@@ -9,6 +9,7 @@ import {
   Text,
   TextInput,
   View,
+  ActivityIndicator,
 } from "react-native";
 
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -29,6 +30,9 @@ const CreateReportScreen = () => {
 
   const [studentName, setStudentName] = useState("");
   const [studentId, setStudentId] = useState("");
+
+  const [guardianName, setGuardianName] = useState("");
+  const [guardianPhoneNumber, setguardianPhoneNumber] = useState("");
 
   const [location, setLocation] = useState("");
 
@@ -58,6 +62,12 @@ const CreateReportScreen = () => {
   const [explainSpecify, setExplainSpecify] = useState("");
 
   const [otherRemarks, setOtherRemarks] = useState("");
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [isEditable, setIsEditable] = useState(false);
+
+  const [errors, setErrors] = useState(null);
 
   // Inappropriate Civilian Attire Violation
   const [
@@ -176,6 +186,8 @@ const CreateReportScreen = () => {
     setProgram(null);
     setStudentName("");
     setStudentId("");
+    setGuardianName("");
+    setguardianPhoneNumber("");
     setTime(new Date());
     setLocation("");
     setViolation(null);
@@ -259,12 +271,15 @@ const CreateReportScreen = () => {
       otherExplainSpecify = explainSpecify;
     }
 
+    setIsLoading(true);
     axios
       .post("http://10.0.2.2:8000/api/mobile-reports", {
-        department_id: department,
-        program_id: program,
+        department,
+        program,
         student_name: studentName,
         student_id: studentId,
+        guardian_name: guardianName,
+        guardian_phone_number: guardianPhoneNumber,
         time: localTime,
         location,
         violation_name: violation,
@@ -281,19 +296,26 @@ const CreateReportScreen = () => {
         handleResetViolation();
         Alert.alert(
           "Success",
-          "Report submitted successfully!",
+          "Report Created Successfully!",
           [{ text: "OK" }],
           { cancelable: false }
         );
+
+        setErrors(null);
+        setIsEditable(false);
       })
-      .catch((res) => {
+      .catch((e) => {
+        setErrors(null);
         Alert.alert(
           "Error",
-          "Failed to submit the report. Please try again.",
+          "Make sure all fields are validated",
           [{ text: "OK" }],
           { cancelable: false }
         );
-      });
+
+        setErrors(e.response.data.errors);
+      })
+      .finally(() => setIsLoading(false));
   };
 
   const getDepartments = () => {
@@ -348,16 +370,34 @@ const CreateReportScreen = () => {
       <View style={styles.container}>
         <Icon
           name="qrcode"
-          size={35}
+          size={25}
           color="gray"
-          style={{ marginBottom: 10, position: "absolute", right: 20, top: 10 }}
+          style={{ position: "absolute", right: 20, top: 20 }}
         />
         <Icon
           name="camera"
-          size={30}
+          size={20}
           color="gray"
-          style={{ marginBottom: 10, position: "absolute", right: 60, top: 12 }}
+          style={{ position: "absolute", right: 52, top: 23 }}
         />
+
+        {!isEditable ? (
+          <Icon
+            name="edit"
+            size={24}
+            color="gray"
+            style={{ position: "absolute", left: 20, top: 22 }}
+            onPress={() => setIsEditable(true)}
+          />
+        ) : (
+          <Icon
+            name="lock"
+            size={24}
+            color="gray"
+            style={{ position: "absolute", left: 22, top: 22 }}
+            onPress={() => setIsEditable(false)}
+          />
+        )}
 
         <View style={styles.content}>
           <View style={styles.violationHeaderContainer}>
@@ -371,7 +411,10 @@ const CreateReportScreen = () => {
             </View>
 
             <View style={[styles.inputGroup, { zIndex: 1000 }]}>
-              <Text style={styles.label}>Department</Text>
+              <View style={{ flexDirection: "row" }}>
+                <Text style={styles.label}>Department </Text>
+                <Text style={{ color: "red" }}>*</Text>
+              </View>
 
               <DropDownPicker
                 open={isDepartmentOpen}
@@ -395,10 +438,19 @@ const CreateReportScreen = () => {
                   backgroundColor: "#fff",
                 }}
               />
+
+              {errors && errors["department"] && errors["department"][0] && (
+                <Text style={{ color: "red", fontSize: 14 }}>
+                  {errors["department"][0]}
+                </Text>
+              )}
             </View>
 
             <View style={[styles.inputGroup, { zIndex: 900 }]}>
-              <Text style={styles.label}>Program</Text>
+              <View style={{ flexDirection: "row" }}>
+                <Text style={styles.label}>Program </Text>
+                <Text style={{ color: "red" }}>*</Text>
+              </View>
 
               <DropDownPicker
                 open={isProgramOpen}
@@ -422,34 +474,124 @@ const CreateReportScreen = () => {
                   backgroundColor: "#fff",
                 }}
               />
+
+              {errors && errors["program"] && errors["program"][0] && (
+                <Text style={{ color: "red", fontSize: 14 }}>
+                  {errors["program"][0]}
+                </Text>
+              )}
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Student Name</Text>
+              <View style={{ flexDirection: "row" }}>
+                <Text style={styles.label}>Student Name </Text>
+                <Text style={{ color: "red" }}>*</Text>
+              </View>
+
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  !isEditable ? { backgroundColor: "#f0f0f0" } : null,
+                ]}
                 placeholder="Enter Student Name "
                 value={studentName}
                 onChangeText={(text) => setStudentName(text)}
+                editable={isEditable}
               />
+
+              {errors &&
+                errors["student_name"] &&
+                errors["student_name"][0] && (
+                  <Text style={{ color: "red", fontSize: 14 }}>
+                    {errors["student_name"][0]}
+                  </Text>
+                )}
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Student ID Number</Text>
+              <View style={{ flexDirection: "row" }}>
+                <Text style={styles.label}>Student ID Number </Text>
+                <Text style={{ color: "red" }}>*</Text>
+              </View>
 
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  !isEditable ? { backgroundColor: "#f0f0f0" } : null,
+                ]}
                 placeholder="Enter Student ID Number"
                 value={studentId}
                 onChangeText={(text) => setStudentId(text)}
+                editable={isEditable}
               />
+
+              {errors && errors["student_id"] && errors["student_id"][0] && (
+                <Text style={{ color: "red", fontSize: 14 }}>
+                  {errors["student_id"][0]}
+                </Text>
+              )}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <View style={{ flexDirection: "row" }}>
+                <Text style={styles.label}>Guardian Name </Text>
+                <Text style={{ color: "red" }}>*</Text>
+              </View>
+
+              <TextInput
+                style={[
+                  styles.input,
+                  !isEditable ? { backgroundColor: "#f0f0f0" } : null,
+                ]}
+                placeholder="Enter Guardian Name"
+                value={guardianName}
+                onChangeText={(text) => setGuardianName(text)}
+                editable={isEditable}
+              />
+
+              {errors &&
+                errors["guardian_name"] &&
+                errors["guardian_name"][0] && (
+                  <Text style={{ color: "red", fontSize: 14 }}>
+                    {errors["guardian_name"][0]}
+                  </Text>
+                )}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <View style={{ flexDirection: "row" }}>
+                <Text style={styles.label}>Guardian Phone Number </Text>
+                <Text style={{ color: "red" }}>*</Text>
+              </View>
+
+              <TextInput
+                style={[
+                  styles.input,
+                  !isEditable ? { backgroundColor: "#f0f0f0" } : null,
+                ]}
+                placeholder="Enter Guardian Phone Number"
+                value={guardianPhoneNumber}
+                onChangeText={(text) => setguardianPhoneNumber(text)}
+                editable={isEditable}
+              />
+
+              {errors &&
+                errors["guardian_phone_number"] &&
+                errors["guardian_phone_number"][0] && (
+                  <Text style={{ color: "red", fontSize: 14 }}>
+                    {errors["guardian_phone_number"][0]}
+                  </Text>
+                )}
             </View>
 
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
               <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
-                <Text style={styles.label}>Time</Text>
+                <View style={{ flexDirection: "row" }}>
+                  <Text style={styles.label}>Time </Text>
+                  <Text style={{ color: "red" }}>*</Text>
+                </View>
 
                 <Pressable onPress={() => setShowPicker(true)}>
                   <TextInput
@@ -464,6 +606,12 @@ const CreateReportScreen = () => {
                   />
                 </Pressable>
 
+                {errors && errors["time"] && errors["time"][0] && (
+                  <Text style={{ color: "red", fontSize: 14 }}>
+                    {errors["time"][0]}
+                  </Text>
+                )}
+
                 {showPicker && (
                   <DateTimePicker
                     value={time}
@@ -476,18 +624,31 @@ const CreateReportScreen = () => {
               </View>
 
               <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
-                <Text style={styles.label}>Location</Text>
+                <View style={{ flexDirection: "row" }}>
+                  <Text style={styles.label}>Location </Text>
+                  <Text style={{ color: "red" }}>*</Text>
+                </View>
+
                 <TextInput
                   style={styles.input}
                   placeholder="Enter Location"
                   value={location}
                   onChangeText={(text) => setLocation(text)}
                 />
+
+                {errors && errors["location"] && errors["location"][0] && (
+                  <Text style={{ color: "red", fontSize: 14 }}>
+                    {errors["location"][0]}
+                  </Text>
+                )}
               </View>
             </View>
 
             <View style={[styles.inputGroup, { zIndex: 1000 }]}>
-              <Text style={styles.label}>Violations</Text>
+              <View style={{ flexDirection: "row" }}>
+                <Text style={styles.label}>Violations </Text>
+                <Text style={{ color: "red" }}>*</Text>
+              </View>
 
               <DropDownPicker
                 open={isViolationOpen}
@@ -513,6 +674,14 @@ const CreateReportScreen = () => {
                   maxHeight: 400,
                 }}
               />
+
+              {errors &&
+                errors["violation_name"] &&
+                errors["violation_name"][0] && (
+                  <Text style={{ color: "red", fontSize: 14 }}>
+                    {errors["violation_name"][0]}
+                  </Text>
+                )}
             </View>
 
             {violation === "Inappropriate Civilian Attire" && (
@@ -1000,7 +1169,11 @@ const CreateReportScreen = () => {
             </View>
 
             <View style={styles.btnContainer}>
-              <Button title="Submit" color="#228b22" onPress={handleSubmit} />
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#228b22" />
+              ) : (
+                <Button title="Submit" color="#228b22" onPress={handleSubmit} />
+              )}
             </View>
           </View>
         </View>
