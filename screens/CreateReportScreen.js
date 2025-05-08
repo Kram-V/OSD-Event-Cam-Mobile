@@ -47,6 +47,8 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
     },
   ]);
 
+  const [section, setSection] = useState("");
+
   const [studentName, setStudentName] = useState("");
   const [studentId, setStudentId] = useState("");
 
@@ -204,6 +206,7 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
     setDepartment(null);
     setProgram(null);
     setYear(null);
+    setSection("");
     setStudentName("");
     setStudentId("");
     setGuardianName("");
@@ -297,6 +300,7 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
         department,
         program,
         year,
+        section,
         student_name: studentName,
         student_id: studentId,
         guardian_name: guardianName,
@@ -504,42 +508,74 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
               )}
             </View>
 
-            <View style={[styles.inputGroup, { zIndex: 800 }]}>
-              <View style={{ flexDirection: "row" }}>
-                <Text style={styles.label}>Year </Text>
-                <Text style={{ color: "red" }}>*</Text>
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <View
+                style={[
+                  styles.inputGroup,
+                  { flex: 1, marginRight: 8, zIndex: 800 },
+                ]}
+              >
+                <View style={{ flexDirection: "row" }}>
+                  <Text style={styles.label}>Year </Text>
+                  <Text style={{ color: "red" }}>*</Text>
+                </View>
+
+                <DropDownPicker
+                  open={isYearOpen}
+                  value={year}
+                  items={years}
+                  setOpen={setIsYearOpen}
+                  setValue={setYear}
+                  setItems={setYears}
+                  placeholder="Select Year"
+                  listMode="SCROLLVIEW"
+                  dropDownDirection="AUTO"
+                  style={{
+                    borderColor: "#ccc",
+                    height: 48,
+                    paddingHorizontal: 12,
+                  }}
+                  textStyle={{ fontSize: 13 }}
+                  dropDownContainerStyle={{
+                    borderWidth: 1,
+                    borderColor: "#ccc",
+                    borderRadius: 6,
+                    backgroundColor: "#fff",
+                    maxHeight: 400,
+                  }}
+                />
+
+                {errors && errors["year"] && errors["year"][0] && (
+                  <Text style={{ color: "red", fontSize: 14 }}>
+                    {errors["year"][0]}
+                  </Text>
+                )}
               </View>
 
-              <DropDownPicker
-                open={isYearOpen}
-                value={year}
-                items={years}
-                setOpen={setIsYearOpen}
-                setValue={setYear}
-                setItems={setYears}
-                placeholder="Select Year"
-                listMode="SCROLLVIEW"
-                dropDownDirection="AUTO"
-                style={{
-                  borderColor: "#ccc",
-                  height: 48,
-                  paddingHorizontal: 12,
-                }}
-                textStyle={{ fontSize: 13 }}
-                dropDownContainerStyle={{
-                  borderWidth: 1,
-                  borderColor: "#ccc",
-                  borderRadius: 6,
-                  backgroundColor: "#fff",
-                  maxHeight: 400,
-                }}
-              />
+              <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
+                <View style={{ flexDirection: "row" }}>
+                  <Text style={styles.label}>Section </Text>
+                  <Text style={{ color: "red" }}>*</Text>
+                </View>
 
-              {errors && errors["year"] && errors["year"][0] && (
-                <Text style={{ color: "red", fontSize: 14 }}>
-                  {errors["year"][0]}
-                </Text>
-              )}
+                <TextInput
+                  style={[
+                    styles.input,
+                    !isEditable ? { backgroundColor: "#f0f0f0" } : null,
+                  ]}
+                  placeholder="Enter Section"
+                  value={section}
+                  onChangeText={(text) => setSection(text)}
+                />
+
+                {errors && errors["section"] && errors["section"][0] && (
+                  <Text style={{ color: "red", fontSize: 14 }}>
+                    {errors["section"][0]}
+                  </Text>
+                )}
+              </View>
             </View>
 
             <View style={styles.inputGroup}>
