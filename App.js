@@ -9,6 +9,7 @@ import SignUpScreen from "./screens/SignUpScreen";
 import HomeScreen from "./screens/HomeScreen";
 import CreateReportScreen from "./screens/CreateReportScreen";
 import ReportsScreen from "./screens/ReportsScreen";
+import EditReportScreen from "./screens/EditReportScreen";
 
 const Stack = createNativeStackNavigator();
 const BottomTabs = createBottomTabNavigator();
@@ -55,8 +56,14 @@ function TabsScreen() {
           ),
         }}
         name="Reports"
-        component={ReportsScreen}
-      />
+      >
+        {() => (
+          <ReportsScreen
+            isCreatedSuccess={isCreatedSuccess}
+            setIsCreatedSuccess={setIsCreatedSuccess}
+          />
+        )}
+      </BottomTabs.Screen>
     </BottomTabs.Navigator>
   );
 }
@@ -67,6 +74,7 @@ export default function App() {
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Sign Up" component={SignUpScreen} />
+        <Stack.Screen name="Edit Report" component={EditReportScreen} />
         <Stack.Screen
           name="Tabs Screen"
           component={TabsScreen}
