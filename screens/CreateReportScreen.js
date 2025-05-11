@@ -20,10 +20,6 @@ import { CheckBox } from "react-native-elements";
 import axios from "axios";
 
 const CreateReportScreen = ({ setIsCreatedSuccess }) => {
-  const [isEducationLevelOpen, setIsEducationLevelOpen] = useState(false);
-  const [educationLevel, setEducationLevel] = useState(null);
-  const [educationLevels, setEducationLevels] = useState([]);
-
   const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
   const [department, setDepartment] = useState(null);
   const [departments, setDepartments] = useState([]);
@@ -48,6 +44,27 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
     {
       label: "Fourth Year",
       value: "Fourth Year",
+    },
+  ]);
+
+  const [isGradeOpen, setIsGradeOpen] = useState(false);
+  const [grade, setGrade] = useState(null);
+  const [grades, setGrades] = useState([
+    { label: "Select Grade", value: "" },
+    {
+      label: "Grade 11",
+      value: "Grade 11",
+    },
+    { label: "Grade 12", value: "Grade 12" },
+  ]);
+
+  const [isEducationLevelOpen, setIsEducationLevelOpen] = useState(false);
+  const [educationLevel, setEducationLevel] = useState("College");
+  const [educationLevels, setEducationLevels] = useState([
+    { label: "College", value: "College" },
+    {
+      label: "Integrated School",
+      value: "Integrated School",
     },
   ]);
 
@@ -211,6 +228,7 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
     setDepartment(null);
     setProgram(null);
     setYear(null);
+    setGrade(null);
     setSection("");
     setStudentName("");
     setStudentId("");
@@ -299,29 +317,54 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
       otherExplainSpecify = explainSpecify;
     }
 
+    const data =
+      educationLevel === "College"
+        ? {
+            education_level_name: educationLevel,
+            department,
+            program,
+            year,
+            section,
+            student_name: studentName,
+            student_id: studentId,
+            guardian_name: guardianName,
+            guardian_phone_number: guardianPhoneNumber,
+            time: localTime,
+            location,
+            violation_name: violation,
+            violations:
+              !selectedViolations || selectedViolations.length == 0
+                ? null
+                : JSON.stringify(selectedViolations),
+            other_violation_name: violationName,
+            explain_specify: otherExplainSpecify,
+            other_remarks: otherRemarks,
+          }
+        : {
+            education_level_name: educationLevel,
+            department,
+            program,
+            grade,
+            section,
+            student_name: studentName,
+            student_id: studentId,
+            guardian_name: guardianName,
+            guardian_phone_number: guardianPhoneNumber,
+            time: localTime,
+            location,
+            violation_name: violation,
+            violations:
+              !selectedViolations || selectedViolations.length == 0
+                ? null
+                : JSON.stringify(selectedViolations),
+            other_violation_name: violationName,
+            explain_specify: otherExplainSpecify,
+            other_remarks: otherRemarks,
+          };
+
     setIsLoading(true);
     axios
-      .post("http://10.0.2.2:8000/api/mobile-reports", {
-        education_level: educationLevel,
-        department,
-        program,
-        year,
-        section,
-        student_name: studentName,
-        student_id: studentId,
-        guardian_name: guardianName,
-        guardian_phone_number: guardianPhoneNumber,
-        time: localTime,
-        location,
-        violation_name: violation,
-        violations:
-          !selectedViolations || selectedViolations.length == 0
-            ? null
-            : JSON.stringify(selectedViolations),
-        other_violation_name: violationName,
-        explain_specify: otherExplainSpecify,
-        other_remarks: otherRemarks,
-      })
+      .post("http://10.0.2.2:8000/api/mobile-reports", data)
       .then((res) => {
         handleReset();
         handleResetViolation();
@@ -345,32 +388,20 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
           { cancelable: false }
         );
 
+        console.log(e);
+
         setErrors(e.response.data.errors);
       })
       .finally(() => setIsLoading(false));
   };
 
-  const getEducationLevels = () => {
+  const getDepartments = (educationLevel) => {
     axios
-      .get("http://10.0.2.2:8000/api/mobile-education-levels")
-      .then((res) => {
-        const mappedEducationLevels = res.data.education_levels.map(
-          (education_level) => {
-            return {
-              label: education_level.name,
-              value: education_level.id,
-            };
-          }
-        );
-
-        setEducationLevels(mappedEducationLevels);
+      .get(`http://10.0.2.2:8000/api/mobile-departments`, {
+        params: {
+          educationLevel,
+        },
       })
-      .catch((e) => console.log(e));
-  };
-
-  const getDepartments = (educationLevelId) => {
-    axios
-      .get(`http://10.0.2.2:8000/api/mobile-departments/${educationLevelId}`)
       .then((res) => {
         const mappedDeparments = res.data.departments.map((department) => {
           return {
@@ -405,10 +436,6 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
   }, [violation]);
 
   useEffect(() => {
-    getEducationLevels();
-  }, []);
-
-  useEffect(() => {
     if (educationLevel) {
       getDepartments(educationLevel);
     }
@@ -419,6 +446,11 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
       getPrograms(department);
     }
   }, [department]);
+
+  useEffect(() => {
+    setGrade(null);
+    setYear(null);
+  }, [educationLevel]);
 
   return (
     <ScrollView
@@ -498,10 +530,10 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
               />
 
               {errors &&
-                errors["education_level"] &&
-                errors["education_level"][0] && (
+                errors["education_level_name"] &&
+                errors["education_level_name"][0] && (
                   <Text style={{ color: "red", fontSize: 14 }}>
-                    {errors["education_level"][0]}
+                    {errors["education_level_name"][0]}
                   </Text>
                 )}
             </View>
@@ -581,48 +613,93 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
-              <View
-                style={[
-                  styles.inputGroup,
-                  { flex: 1, marginRight: 8, zIndex: 800 },
-                ]}
-              >
-                <View style={{ flexDirection: "row" }}>
-                  <Text style={styles.label}>Year </Text>
-                  <Text style={{ color: "red" }}>*</Text>
+              {educationLevel === "College" ? (
+                <View
+                  style={[
+                    styles.inputGroup,
+                    { flex: 1, marginRight: 8, zIndex: 800 },
+                  ]}
+                >
+                  <View style={{ flexDirection: "row" }}>
+                    <Text style={styles.label}>Year </Text>
+                    <Text style={{ color: "red" }}>*</Text>
+                  </View>
+
+                  <DropDownPicker
+                    open={isYearOpen}
+                    value={year}
+                    items={years}
+                    setOpen={setIsYearOpen}
+                    setValue={setYear}
+                    setItems={setYears}
+                    placeholder="Select Year"
+                    listMode="SCROLLVIEW"
+                    dropDownDirection="AUTO"
+                    style={{
+                      borderColor: "#ccc",
+                      height: 48,
+                      paddingHorizontal: 12,
+                    }}
+                    textStyle={{ fontSize: 13 }}
+                    dropDownContainerStyle={{
+                      borderWidth: 1,
+                      borderColor: "#ccc",
+                      borderRadius: 6,
+                      backgroundColor: "#fff",
+                      maxHeight: 400,
+                    }}
+                  />
+
+                  {errors && errors["year"] && errors["year"][0] && (
+                    <Text style={{ color: "red", fontSize: 14 }}>
+                      {errors["year"][0]}
+                    </Text>
+                  )}
                 </View>
+              ) : (
+                <View
+                  style={[
+                    styles.inputGroup,
+                    { flex: 1, marginRight: 8, zIndex: 800 },
+                  ]}
+                >
+                  <View style={{ flexDirection: "row" }}>
+                    <Text style={styles.label}>Grade </Text>
+                    <Text style={{ color: "red" }}>*</Text>
+                  </View>
 
-                <DropDownPicker
-                  open={isYearOpen}
-                  value={year}
-                  items={years}
-                  setOpen={setIsYearOpen}
-                  setValue={setYear}
-                  setItems={setYears}
-                  placeholder="Select Year"
-                  listMode="SCROLLVIEW"
-                  dropDownDirection="AUTO"
-                  style={{
-                    borderColor: "#ccc",
-                    height: 48,
-                    paddingHorizontal: 12,
-                  }}
-                  textStyle={{ fontSize: 13 }}
-                  dropDownContainerStyle={{
-                    borderWidth: 1,
-                    borderColor: "#ccc",
-                    borderRadius: 6,
-                    backgroundColor: "#fff",
-                    maxHeight: 400,
-                  }}
-                />
+                  <DropDownPicker
+                    open={isGradeOpen}
+                    value={grade}
+                    items={grades}
+                    setOpen={setIsGradeOpen}
+                    setValue={setGrade}
+                    setItems={setGrades}
+                    placeholder="Select Grade"
+                    listMode="SCROLLVIEW"
+                    dropDownDirection="AUTO"
+                    style={{
+                      borderColor: "#ccc",
+                      height: 48,
+                      paddingHorizontal: 12,
+                    }}
+                    textStyle={{ fontSize: 13 }}
+                    dropDownContainerStyle={{
+                      borderWidth: 1,
+                      borderColor: "#ccc",
+                      borderRadius: 6,
+                      backgroundColor: "#fff",
+                      maxHeight: 400,
+                    }}
+                  />
 
-                {errors && errors["year"] && errors["year"][0] && (
-                  <Text style={{ color: "red", fontSize: 14 }}>
-                    {errors["year"][0]}
-                  </Text>
-                )}
-              </View>
+                  {errors && errors["grade"] && errors["grade"][0] && (
+                    <Text style={{ color: "red", fontSize: 14 }}>
+                      {errors["grade"][0]}
+                    </Text>
+                  )}
+                </View>
+              )}
 
               <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
                 <View style={{ flexDirection: "row" }}>
