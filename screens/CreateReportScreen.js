@@ -20,6 +20,10 @@ import { CheckBox } from "react-native-elements";
 import axios from "axios";
 
 const CreateReportScreen = ({ setIsCreatedSuccess }) => {
+  const [isEducationLevelOpen, setIsEducationLevelOpen] = useState(false);
+  const [educationLevel, setEducationLevel] = useState(null);
+  const [educationLevels, setEducationLevels] = useState([]);
+
   const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
   const [department, setDepartment] = useState(null);
   const [departments, setDepartments] = useState([]);
@@ -203,6 +207,7 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
   };
 
   const handleReset = () => {
+    setEducationLevel(null);
     setDepartment(null);
     setProgram(null);
     setYear(null);
@@ -297,6 +302,7 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
     setIsLoading(true);
     axios
       .post("http://10.0.2.2:8000/api/mobile-reports", {
+        education_level: educationLevel,
         department,
         program,
         year,
@@ -344,9 +350,27 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
       .finally(() => setIsLoading(false));
   };
 
-  const getDepartments = () => {
+  const getEducationLevels = () => {
     axios
-      .get("http://10.0.2.2:8000/api/mobile-departments")
+      .get("http://10.0.2.2:8000/api/mobile-education-levels")
+      .then((res) => {
+        const mappedEducationLevels = res.data.education_levels.map(
+          (education_level) => {
+            return {
+              label: education_level.name,
+              value: education_level.id,
+            };
+          }
+        );
+
+        setEducationLevels(mappedEducationLevels);
+      })
+      .catch((e) => console.log(e));
+  };
+
+  const getDepartments = (educationLevelId) => {
+    axios
+      .get(`http://10.0.2.2:8000/api/mobile-departments/${educationLevelId}`)
       .then((res) => {
         const mappedDeparments = res.data.departments.map((department) => {
           return {
@@ -381,11 +405,19 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
   }, [violation]);
 
   useEffect(() => {
-    getDepartments();
+    getEducationLevels();
   }, []);
 
   useEffect(() => {
-    getPrograms(department);
+    if (educationLevel) {
+      getDepartments(educationLevel);
+    }
+  }, [educationLevel]);
+
+  useEffect(() => {
+    if (department) {
+      getPrograms(department);
+    }
   }, [department]);
 
   return (
@@ -434,6 +466,44 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
               />
 
               <Text style={styles.violationText}>Violation Form</Text>
+            </View>
+
+            <View style={[styles.inputGroup, { zIndex: 1100 }]}>
+              <View style={{ flexDirection: "row" }}>
+                <Text style={styles.label}>Education Level </Text>
+                <Text style={{ color: "red" }}>*</Text>
+              </View>
+
+              <DropDownPicker
+                open={isEducationLevelOpen}
+                value={educationLevel}
+                items={educationLevels}
+                setOpen={setIsEducationLevelOpen}
+                setValue={setEducationLevel}
+                setItems={setEducationLevels}
+                placeholder="Select Education Level"
+                listMode="SCROLLVIEW"
+                style={{
+                  borderColor: "#ccc",
+                  height: 48,
+                  paddingHorizontal: 12,
+                }}
+                textStyle={{ fontSize: 13 }}
+                dropDownContainerStyle={{
+                  borderWidth: 1,
+                  borderColor: "#ccc",
+                  borderRadius: 6,
+                  backgroundColor: "#fff",
+                }}
+              />
+
+              {errors &&
+                errors["education_level"] &&
+                errors["education_level"][0] && (
+                  <Text style={{ color: "red", fontSize: 14 }}>
+                    {errors["education_level"][0]}
+                  </Text>
+                )}
             </View>
 
             <View style={[styles.inputGroup, { zIndex: 1000 }]}>

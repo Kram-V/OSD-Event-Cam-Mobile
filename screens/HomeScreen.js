@@ -5,34 +5,23 @@ import Icon from "react-native-vector-icons/FontAwesome";
 
 const HomeScreen = ({ isCreatedSuccess, setIsCreatedSuccess }) => {
   const [stats, setStats] = useState(null);
-  const [reports, setReports] = useState([]);
 
   const getStats = () => {
     axios
       .get("http://10.0.2.2:8000/api/mobile-stats")
       .then((res) => {
-        setStats(res.data.total_non_admin_users);
-      })
-      .catch((e) => console.log(e));
-  };
-
-  const getReports = () => {
-    axios
-      .get("http://10.0.2.2:8000/api/mobile-reports")
-      .then((res) => {
-        setReports(res.data.reports);
+        setStats(res.data);
       })
       .catch((e) => console.log(e));
   };
 
   useEffect(() => {
     getStats();
-    getReports();
   }, []);
 
   useEffect(() => {
     if (isCreatedSuccess) {
-      getReports();
+      getStats();
       setIsCreatedSuccess(false);
     }
   }, [isCreatedSuccess]);
@@ -51,7 +40,7 @@ const HomeScreen = ({ isCreatedSuccess, setIsCreatedSuccess }) => {
           <Text>Total Student Reports</Text>
         </View>
 
-        <Text style={styles.totalNumber}>{reports.length}</Text>
+        <Text style={styles.totalNumber}>{stats?.total_reports}</Text>
       </View>
 
       <View style={styles.totalPendingReports}>
@@ -96,7 +85,7 @@ const HomeScreen = ({ isCreatedSuccess, setIsCreatedSuccess }) => {
           <Text>Total Staff Users</Text>
         </View>
 
-        <Text style={styles.totalNumber}>{stats}</Text>
+        <Text style={styles.totalNumber}>{stats?.total_non_admin_users}</Text>
       </View>
     </View>
   );
