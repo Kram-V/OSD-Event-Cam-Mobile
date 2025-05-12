@@ -51,11 +51,11 @@ const SignUpScreen = () => {
               onPress={() => navigation.navigate("Tabs Screen")}
             />
           </View>
-          <Pressable onPress={() => navigation.navigate("Sign Up")}>
+          {/* <Pressable onPress={() => navigation.navigate("Sign Up")}>
             <Text style={styles.signUpTextLink}>
               Sign up if you don't have an account
             </Text>
-          </Pressable>
+          </Pressable> */}
         </View>
       </View>
     </View>
