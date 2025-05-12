@@ -59,8 +59,9 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
   ]);
 
   const [isEducationLevelOpen, setIsEducationLevelOpen] = useState(false);
-  const [educationLevel, setEducationLevel] = useState("College");
+  const [educationLevel, setEducationLevel] = useState(null);
   const [educationLevels, setEducationLevels] = useState([
+    { label: "Select Education Level", value: "" },
     { label: "College", value: "College" },
     {
       label: "Integrated School",
