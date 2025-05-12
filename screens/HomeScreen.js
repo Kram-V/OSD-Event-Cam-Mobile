@@ -55,7 +55,7 @@ const HomeScreen = ({ isCreatedSuccess, setIsCreatedSuccess }) => {
           <Text>Total Pending Reports</Text>
         </View>
 
-        <Text style={styles.totalNumber}>25</Text>
+        <Text style={styles.totalNumber}>{stats?.total_pending_reports}</Text>
       </View>
 
       <View style={styles.totalResolvedReports}>
@@ -70,7 +70,7 @@ const HomeScreen = ({ isCreatedSuccess, setIsCreatedSuccess }) => {
           <Text>Total Resolved Reports</Text>
         </View>
 
-        <Text style={styles.totalNumber}>25</Text>
+        <Text style={styles.totalNumber}>{stats?.total_resolved_reports}</Text>
       </View>
 
       <View style={styles.totalStaffUsers}>
