@@ -19,6 +19,14 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { CheckBox } from "react-native-elements";
 import axios from "axios";
 
+const report = [
+  { id: 1, name: "Violation Report 1", image: null },
+  { id: 2, name: "Violation Report 2", image: null },
+  { id: 3, name: "Violation Report 3", image: null },
+  { id: 4, name: "Violation Report 4", image: null },
+  { id: 5, name: "Violation Report 5", image: null },
+];
+
 const CreateReportScreen = ({ setIsCreatedSuccess }) => {
   const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
   const [department, setDepartment] = useState(null);
@@ -465,27 +473,27 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
           color="gray"
           style={{ position: "absolute", right: 20, top: 20 }}
         />
-        <Icon
+        {/* <Icon
           name="camera"
           size={20}
           color="gray"
           style={{ position: "absolute", right: 52, top: 23 }}
-        />
+        /> */}
 
         {!isEditable ? (
           <Icon
             name="edit"
-            size={24}
+            size={25}
             color="gray"
-            style={{ position: "absolute", left: 20, top: 22 }}
+            style={{ position: "absolute", right: 48, top: 20 }}
             onPress={() => setIsEditable(true)}
           />
         ) : (
           <Icon
             name="lock"
-            size={24}
+            size={25}
             color="gray"
-            style={{ position: "absolute", left: 22, top: 22 }}
+            style={{ position: "absolute", right: 52, top: 20 }}
             onPress={() => setIsEditable(false)}
           />
         )}
@@ -716,6 +724,7 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
                   placeholder="Enter Section"
                   value={section}
                   onChangeText={(text) => setSection(text)}
+                  editable={isEditable}
                 />
 
                 {errors && errors["section"] && errors["section"][0] && (
@@ -1397,6 +1406,14 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
               </>
             )}
 
+            <View style={styles.imageContainer}>
+              {report?.image ? (
+                <Image source={report.image} style={styles.image} />
+              ) : (
+                <Text style={styles.noImageText}>No image available</Text>
+              )}
+            </View>
+
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Other Remarks</Text>
               <TextInput
@@ -1411,6 +1428,13 @@ const CreateReportScreen = ({ setIsCreatedSuccess }) => {
                 onChangeText={(text) => setOtherRemarks(text)}
               />
             </View>
+
+            <Icon
+              name="camera"
+              size={45}
+              color="gray"
+              style={{ marginBottom: 10 }}
+            />
 
             <View style={styles.btnContainer}>
               {isLoading ? (
@@ -1496,5 +1520,17 @@ const styles = StyleSheet.create({
   signUpTextLink: {
     textAlign: "center",
     textDecorationLine: "underline",
+  },
+
+  imageContainer: {
+    width: 275,
+    height: 200,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    backgroundColor: "#f9f9f9",
   },
 });
